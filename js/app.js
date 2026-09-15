@@ -19,7 +19,7 @@ async function testSupabaseConnection() {
     status.textContent = 'Telegram подключён · Supabase подключён ✓';
   } catch (error) {
     console.error('Supabase connection error:', error);
-    status.textContent = 'Supabase подключён, но БД пока не отвечает';
+    status.textContent = `Supabase: ошибка · ${error.message}`;
   }
 }
 
