@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0b0f">
+  <title>AFG — Aura Farm Group</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">₳₣₲ · FORMULA AVENUE</div>
+        <h1>Aura Farm Group</h1>
+      </div>
+      <div id="user-avatar" class="avatar" aria-hidden="true">₳</div>
+    </header>
+
+    <section class="hero-card">
+      <p class="hero-label">КОМПАНИЯ</p>
+      <h2>Добро пожаловать в AFG</h2>
+      <p id="welcome-text">Подключаем Telegram и общую базу компании.</p>
+    </section>
+
+    <section class="dashboard-grid" aria-label="Разделы AFG">
+      <button class="tile" data-section="participants"><span>👥</span><strong>Участники</strong><small>Люди и профили</small></button>
+      <button class="tile" data-section="places"><span>📍</span><strong>Места</strong><small>Локации и заведения</small></button>
+      <button class="tile" data-section="events"><span>🎉</span><strong>Мероприятия</strong><small>Планы и встречи</small></button>
+      <button class="tile" data-section="finance"><span>💰</span><strong>Финансы</strong><small>Сборы и расходы</small></button>
+      <button class="tile" data-section="resources"><span>📦</span><strong>Ресурсы</strong><small>Общие вещи</small></button>
+      <button class="tile" data-section="notes"><span>📝</span><strong>Заметки</strong><small>Внутренняя база</small></button>
+      <button class="tile" data-section="polls"><span>🗳️</span><strong>Решения</strong><small>Голосования</small></button>
+      <button class="tile" data-section="settings"><span>⚙️</span><strong>Компания</strong><small>Настройки AFG</small></button>
+    </section>
+
+    <footer class="status" id="connection-status">Локальный режим · Supabase ещё не подключён</footer>
+  </main>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="js/telegram.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
