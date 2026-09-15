@@ -1,7 +1,13 @@
-// Supabase connection will be configured after the project URL
-// and public anon key are added. Never put the service_role key here.
+const SUPABASE_URL = 'https://jarrnncwhrrydecdayde.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_7I8l4WAzG2JhJBCtsQV0zg_YxUt6I0d';
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
 
 window.AFGSupabase = {
-  client: null,
-  configured: false
+  client: supabaseClient,
+  configured: true,
+  url: SUPABASE_URL
 };
