@@ -47,24 +47,60 @@ async function savePlace(e, existing = null) {
   }
 }
 
+function closeDeleteModal() {
+  document.getElementById('afg-delete-modal')?.remove();
+}
+
+function showDeleteModal(place) {
+  closeDeleteModal();
+
+  const modal = document.createElement('div');
+  modal.id = 'afg-delete-modal';
+  modal.className = 'afg-modal-backdrop';
+  modal.innerHTML = `
+    <div class="afg-modal" role="dialog" aria-modal="true" aria-labelledby="afg-delete-title">
+      <p class="section-kicker">₳₣₲ · PLACES</p>
+      <h3 id="afg-delete-title">Удалить место?</h3>
+      <p>Ты точно хочешь удалить <strong>${esc(place.name || 'Без названия')}</strong>?</p>
+      <div class="afg-modal-actions">
+        <button type="button" class="secondary-btn wide" id="afg-delete-cancel">Отмена</button>
+        <button type="button" class="primary-btn wide danger-btn" id="afg-delete-confirm">Удалить</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+  document.getElementById('afg-delete-cancel').onclick = closeDeleteModal;
+  document.getElementById('afg-delete-confirm').onclick = async () => {
+    const button = document.getElementById('afg-delete-confirm');
+    button.disabled = true;
+    button.textContent = 'Удаляем…';
+
+    try {
+      const { error } = await window.AFGSupabase.client
+        .from('places')
+        .delete()
+        .eq('id', place.id);
+      if (error) throw error;
+      closeDeleteModal();
+      await places();
+    } catch (x) {
+      console.error(x);
+      button.disabled = false;
+      button.textContent = 'Удалить';
+      alert(`Не удалось удалить место: ${x.message}`);
+    }
+  };
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeDeleteModal();
+  });
+}
+
 async function deletePlace(placeId) {
   const place = currentPlaces.find(p => String(p.id) === String(placeId));
   if (!place) return;
-
-  const ok = confirm(`Удалить место «${place.name || 'Без названия'}»?`);
-  if (!ok) return;
-
-  try {
-    const { error } = await window.AFGSupabase.client
-      .from('places')
-      .delete()
-      .eq('id', placeId);
-    if (error) throw error;
-    await places();
-  } catch (x) {
-    console.error(x);
-    alert(`Не удалось удалить место: ${x.message}`);
-  }
+  showDeleteModal(place);
 }
 
 function viewPlace(p) {
