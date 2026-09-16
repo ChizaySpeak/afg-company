@@ -263,3 +263,84 @@ function openPlacePhotoViewer(photos, index, name) {
   });
   render();
 }
+
+// Search + category filters for Places
+let placesSearchQuery = '';
+let placesCategoryFilter = 'all';
+
+function renderPlacesList() {
+  const list = document.getElementById('places-list');
+  const empty = document.getElementById('places-filter-empty');
+  if (!list) return;
+
+  const query = placesSearchQuery.trim().toLowerCase();
+  const filtered = currentPlaces.filter(p => {
+    const category = String(p.category || '').trim();
+    const haystack = [p.name, p.address, p.description, category].map(v => String(v || '').toLowerCase()).join(' ');
+    const matchesSearch = !query || haystack.includes(query);
+    const matchesCategory = placesCategoryFilter === 'all' || category === placesCategoryFilter;
+    return matchesSearch && matchesCategory;
+  });
+
+  list.innerHTML = filtered.map(p => `<button class="profile-card" data-place-id="${esc(p.id)}"><div class="profile-avatar">📍</div><div><div class="profile-name">${esc(p.name || 'Без названия')}</div><div class="profile-meta">${esc(p.address || p.category || 'Место AFG')}</div></div></button>`).join('');
+  list.querySelectorAll('[data-place-id]').forEach(c => c.onclick = () => viewPlace(currentPlaces.find(p => String(p.id) === c.dataset.placeId)));
+
+  if (empty) empty.classList.toggle('hidden', filtered.length !== 0);
+}
+
+function placesFilters() {
+  const categories = [...new Set(currentPlaces.map(p => String(p.category || '').trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b, 'ru'));
+  return `
+    <div class="places-tools">
+      <input id="places-search" class="places-search" type="search" maxlength="100" placeholder="🔎 Найти место…" autocomplete="off">
+      <div class="places-filters" id="places-filters">
+        <button type="button" class="places-filter active" data-category="all">Все</button>
+        ${categories.map(c => `<button type="button" class="places-filter" data-category="${esc(c)}">${esc(c)}</button>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+async function places() {
+  home.classList.add('hidden');
+  section.classList.remove('hidden');
+  section.innerHTML = '<button class="back" id="back">← Назад</button><div class="section-head"><div><p class="section-kicker">₳₣₲ · PLACES</p><h2>Места</h2></div><button class="primary-btn" id="create-place">＋ Место</button></div><p class="loading" id="places-loading">Загружаем места AFG…</p>';
+  bindBack();
+
+  try {
+    const { data, error } = await supabaseApi.client.from('places').select('*').order('name', { ascending: true });
+    if (error) throw error;
+    currentPlaces = data || [];
+
+    document.getElementById('create-place').onclick = () => placeForm();
+
+    if (!currentPlaces.length) {
+      document.getElementById('places-loading').outerHTML = '<div class="empty-state"><div class="empty-icon">📍</div><h3>Пока мест нет</h3><p>Добавь первое место AFG.</p><button class="primary-btn wide" id="empty-place">＋ Добавить место</button></div>';
+      document.getElementById('empty-place').onclick = () => placeForm();
+      return;
+    }
+
+    document.getElementById('places-loading').remove();
+    placesSearchQuery = '';
+    placesCategoryFilter = 'all';
+    section.insertAdjacentHTML('beforeend', placesFilters() + '<div id="places-filter-empty" class="places-filter-empty hidden"><div class="empty-icon">🔎</div><h3>Ничего не нашли</h3><p>Попробуй изменить запрос или фильтр.</p></div><div id="places-list"></div>');
+
+    const search = document.getElementById('places-search');
+    search.addEventListener('input', () => {
+      placesSearchQuery = search.value;
+      renderPlacesList();
+    });
+
+    document.querySelectorAll('.places-filter').forEach(btn => btn.addEventListener('click', () => {
+      placesCategoryFilter = btn.dataset.category || 'all';
+      document.querySelectorAll('.places-filter').forEach(x => x.classList.toggle('active', x === btn));
+      renderPlacesList();
+    }));
+
+    renderPlacesList();
+  } catch (e) {
+    console.error(e);
+    const loading = document.getElementById('places-loading');
+    if (loading) loading.outerHTML = `<div class="empty-state"><div class="empty-icon">📍</div><h3>Не удалось загрузить места</h3><p>Проверь подключение к Supabase.</p><small>${esc(e.message)}</small></div>`;
+  }
+}
